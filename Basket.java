@@ -1,18 +1,17 @@
 
-//qstsn--- check the issue about array constants can only be used in initializers(initializing arr as empty in constructor)
 
 
 public class Basket {
 	private MarketProduct[] arr;                      // array of type MarketProduct
 
 	public Basket() {
-		arr= new MarketProduct[10];
+		this.arr= new MarketProduct[0];
 
 	}
 
 	public  MarketProduct[] getProducts(){
 		MarketProduct[] shallowCopyArr= new MarketProduct [arr.length];
-		for (int i = 0; i < arr.length; i++){
+		for (int i = 0; i < arr.length; i++) {
 			shallowCopyArr[i]= arr[i];	
 		}
 		return shallowCopyArr;
@@ -22,59 +21,106 @@ public class Basket {
 
 	public void add(MarketProduct e ) {
 		int size= arr.length;
-		if(arr[size+1].equals(null)) {
-			arr[size+1]=e;
-		}
-		else {
-			MarketProduct[] bigArr= new MarketProduct[arr.length*2];
+
+		MarketProduct[] bigArr= new MarketProduct[arr.length + 1];
+		if (size >= 1) {
 			for(int i=0; i <arr.length; i++) {
 				bigArr[i]=arr[i];
-				bigArr[size+1]=e;
 			}
-			arr=bigArr;
 		}
+		bigArr[size]=e;          //add the element after the for loop of copying the elements
+
+		arr=bigArr;
+	}
 
 
-		//----------------------------------------------------------------------------------------
-		/*	if(arr.length==arr.size) {
-			MarketProduct[] bigArr= new MarketProduct[arr.length*2];
-			for(int i=0; i <arr.length; i++) {
-			bigArr[i]=arr[i];	
-
-		bigArr.add(e);
-		}
-			}
-	this.add(e);*/
-		//-----------------------------------------------------------------------------------------
-	} 
 
 	public boolean remove(MarketProduct myProd) {
-		boolean product =true;
+
 		for(int i=0; i<arr.length; i++) {
-			boolean item= arr.equals(myProd);
-			if(item==true) {
-				this.remove(myProd);
-				break;
-				//----------- if I use arr.remove() there is an error			
+			if(arr[i].equals(myProd)) {
+				arr = removeHelper(i);
+				return true;               //exits the loop
 			}
-			else {
-				product = false;
-			}}
-		return product;
+		}
+		return false;
 	}
+
+	private MarketProduct[] removeHelper(int index) {
+		MarketProduct[] temp = new MarketProduct[arr.length - 1];
+		int copyIndex = 0;
+		for(int i = 0; i < arr.length; i++) {
+			if(i != index) {
+				temp[copyIndex] = arr[i]; 
+				copyIndex++;
+			}
+		}
+		return temp;
+	}
+
+
 	public void clear() {
-		this.clear();	
-		//-----------------------------------------------------------------------	
-		//arr.clear(); has error WHY? I can't invoke array of mrktprod yet afterall thisbasket has array of mrktprod inside it
+//		for(int i=0; i < arr.length; i++) {
+//			arr[i]= null;	
+//		}		
+		arr = new MarketProduct[0];
 	}
 
 	public int getNumOfProducts() {
 		int num = this.getProducts().length;
-		//------------------------------------------------------		
-		//int num =this.length; had an error why?		
 		return num;
 	}
+
+	public int getSubTotal() {
+		int subTotal=0;
+		for(int i=0;i < arr.length; i++) {
+			subTotal += arr[i].getCost();
+
+		}
+		return subTotal;
+	}                                   //don't need to call getCost() on every instance as arr is of type MrketProd
+	public int getTotalTax() {
+
+		int totalTax=0;
+		for(int i=0; i<arr.length; i++) {
+			if(arr[i] instanceof Jam) {
+				totalTax+= (int)(arr[i].getCost() * 0.15);	
+			}
+		}
+		return totalTax;
+	}
+
+	public int getTotalCost() {
+		int jamTax= getTotalTax();
+		int totalCost= getSubTotal( )+ jamTax;	
+		return totalCost;
+	}
+
+	public String toString() {
+		String item = "";
+		for(int i=0; i<arr.length; i++) {
+			item += this.arr[i].getName() + "\t" +StringFormatter( arr[i].getCost()) + "\n";
+		}
+		item += "\n" + StringFormatter(getSubTotal()) + "\n" + StringFormatter(getTotalTax()) + "\n\n" + StringFormatter(getTotalCost());
+		return item;
+	}
+	private String StringFormatter(int amount) {
+		//String returnType= "";
+		int val= amount/100;
+		int myVal= amount%100;
+		if(amount <=0) {
+			return "-";
+		}
+		else if(myVal<10) {
+			return val + ".0" + myVal;
+		}
+		else {
+			return val + "." + myVal;
+		}
+		
+	}
 }
+
 
 
 
